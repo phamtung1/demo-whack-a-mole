@@ -5,10 +5,10 @@ const levelEl = document.getElementById('level');
 const startBtn = document.getElementById('startBtn');
 const pauseBtn = document.getElementById('pauseBtn');
 const resetBtn = document.getElementById('resetBtn');
+const levelUpBanner = document.getElementById('level-up-banner');
 
 let score = 0;
 let level = 1;
-const maxLevel = 5;
 let objectTimeout = null;
 let clickedThisCycle = false;
 let isPaused = false;
@@ -16,6 +16,7 @@ let isRunning = false;
 
 const moleEmoji = '🐹';
 const bombEmoji = '💣';
+const maxLevel = 5;
 
 const levelDurations = {
   1: 1500,
@@ -56,12 +57,27 @@ const getRandomObject = () => Math.random() < 0.8 ? moleEmoji : bombEmoji;
 const updateScore = (change) => {
   score = Math.max(0, score + change);
   scoreEl.textContent = score;
+
+  const newLevel = Math.min(maxLevel, Math.floor(score / 100) + 1);
+  if (newLevel > level) {
+    level = newLevel;
+    levelEl.textContent = level;
+    showLevelUpBanner();
+  }
 };
 
 const flashCell = (cell, type) => {
   const className = type === 'mole' ? 'hit-mole' : 'hit-bomb';
   cell.classList.add(className);
   setTimeout(() => cell.classList.remove(className), 200);
+};
+
+const showLevelUpBanner = () => {
+  levelUpBanner.textContent = `Level Up! Welcome to Level ${level}`;
+  levelUpBanner.classList.remove('hidden');
+  setTimeout(() => {
+    levelUpBanner.classList.add('hidden');
+  }, 2000);
 };
 
 const spawnObject = () => {
@@ -82,12 +98,6 @@ const spawnObject = () => {
     if (obj === moleEmoji) {
       updateScore(10);
       flashCell(cell, 'mole');
-
-      if (score >= level * 100 && level < maxLevel) {
-        level++;
-        levelEl.textContent = level;
-      }
-
       clearGrid();
       setTimeout(spawnObject, 10);
     } else {
@@ -132,6 +142,7 @@ const resetGame = () => {
   level = 1;
   scoreEl.textContent = score;
   levelEl.textContent = level;
+  levelUpBanner.classList.add('hidden');
   clearGrid();
   updateButtonStates();
 };
@@ -142,7 +153,6 @@ const updateButtonStates = () => {
   resetBtn.disabled = !isRunning;
 };
 
-// Event bindings
 startBtn.onclick = startGame;
 pauseBtn.onclick = pauseGame;
 resetBtn.onclick = resetGame;

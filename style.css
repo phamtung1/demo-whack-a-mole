@@ -97,6 +97,30 @@ h1 {
   cursor: not-allowed;
 }
 
+#level-up-banner {
+  font-size: 24px;
+  background-color: #ffeb3b;
+  color: #333;
+  padding: 10px 30px;
+  border-radius: 10px;
+  margin: 15px 0;
+  animation: fade 2s ease;
+  text-align: center;
+  z-index: 1000;
+}
+
+@keyframes fade {
+  0% { opacity: 0; transform: translateY(-20px); }
+  20% { opacity: 1; transform: translateY(0); }
+  80% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-20px); }
+}
+
+.hidden {
+  display: none;
+}
+
+
 @media (max-width: 600px) {
   #game {
     grid-template-columns: repeat(3, 70px);
