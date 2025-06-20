@@ -61,6 +61,42 @@ h1 {
   background-color: #ff4d4d; /* Red flash */
 }
 
+.controls {
+  display: flex;
+  gap: 20px;
+  margin: 20px 0;
+}
+
+.controls button {
+  padding: 10px 20px;
+  font-size: 18px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  min-width: 100px;
+}
+
+#startBtn {
+  background-color: #4caf50;
+  color: white;
+}
+
+#pauseBtn {
+  background-color: #f39c12;
+  color: white;
+}
+
+#resetBtn {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.controls button:disabled {
+  background-color: #ccc;
+  color: #666;
+  cursor: not-allowed;
+}
+
 @media (max-width: 600px) {
   #game {
     grid-template-columns: repeat(3, 70px);

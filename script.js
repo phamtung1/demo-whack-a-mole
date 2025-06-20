@@ -2,11 +2,17 @@ const gameGrid = document.getElementById('game');
 const scoreEl = document.getElementById('score');
 const levelEl = document.getElementById('level');
 
+const startBtn = document.getElementById('startBtn');
+const pauseBtn = document.getElementById('pauseBtn');
+const resetBtn = document.getElementById('resetBtn');
+
 let score = 0;
 let level = 1;
 const maxLevel = 5;
 let objectTimeout = null;
 let clickedThisCycle = false;
+let isPaused = false;
+let isRunning = false;
 
 const moleEmoji = '🐹';
 const bombEmoji = '💣';
@@ -22,6 +28,7 @@ const levelDurations = {
 const getDuration = () => levelDurations[level] || 600;
 
 const createGrid = () => {
+  gameGrid.innerHTML = '';
   for (let i = 0; i < 9; i++) {
     const cell = document.createElement('div');
     cell.classList.add('hole');
@@ -58,6 +65,8 @@ const flashCell = (cell, type) => {
 };
 
 const spawnObject = () => {
+  if (!isRunning || isPaused) return;
+
   clearGrid();
   clickedThisCycle = false;
 
@@ -66,21 +75,22 @@ const spawnObject = () => {
   cell.textContent = obj;
 
   cell.onclick = () => {
-    if (clickedThisCycle) return;
+    if (clickedThisCycle || isPaused) return;
     clickedThisCycle = true;
-
     clearTimeout(objectTimeout);
 
     if (obj === moleEmoji) {
       updateScore(10);
       flashCell(cell, 'mole');
+
       if (score >= level * 100 && level < maxLevel) {
         level++;
         levelEl.textContent = level;
       }
+
       clearGrid();
       setTimeout(spawnObject, 10);
-    } else if (obj === bombEmoji) {
+    } else {
       updateScore(-5);
       flashCell(cell, 'bomb');
       alert(`Game Over! Final Score: ${score}`);
@@ -94,15 +104,48 @@ const spawnObject = () => {
   }, getDuration());
 };
 
+const startGame = () => {
+  if (!isRunning) {
+    score = 0;
+    level = 1;
+    scoreEl.textContent = score;
+    levelEl.textContent = level;
+    isRunning = true;
+  }
+  isPaused = false;
+
+  updateButtonStates();
+  spawnObject();
+};
+
+const pauseGame = () => {
+  isPaused = true;
+  clearTimeout(objectTimeout);
+  updateButtonStates();
+};
+
 const resetGame = () => {
   clearTimeout(objectTimeout);
+  isRunning = false;
+  isPaused = false;
   score = 0;
   level = 1;
   scoreEl.textContent = score;
   levelEl.textContent = level;
   clearGrid();
-  setTimeout(spawnObject, 100);
+  updateButtonStates();
 };
 
+const updateButtonStates = () => {
+  startBtn.disabled = isRunning && !isPaused;
+  pauseBtn.disabled = !isRunning || isPaused;
+  resetBtn.disabled = !isRunning;
+};
+
+// Event bindings
+startBtn.onclick = startGame;
+pauseBtn.onclick = pauseGame;
+resetBtn.onclick = resetGame;
+
 createGrid();
-spawnObject();
+updateButtonStates();
