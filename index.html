@@ -101,11 +101,21 @@
 
     let score = 0;
     let level = 1;
-    let speed = 1500; // in ms
-    let maxLevel = 5;
-    let moleInterval;
+    const maxLevel = 5;
+    let objectTimeout = null;
+
     const moleEmoji = '🐹';
     const bombEmoji = '💣';
+
+    const levelDurationMap = {
+      1: 1500,
+      2: 1200,
+      3: 1000,
+      4: 800,
+      5: 600
+    };
+
+    const getCurrentDuration = () => levelDurationMap[level] || 600;
 
     const createGrid = () => {
       for (let i = 0; i < 9; i++) {
@@ -129,55 +139,61 @@
       return cells[index];
     };
 
-    const showRandomCharacter = () => {
+    const getRandomObject = () => {
+      return Math.random() < 0.8 ? moleEmoji : bombEmoji;
+    };
+
+    const spawnObject = () => {
       clearGrid();
 
       const cell = getRandomCell();
-      const isBomb = Math.random() < 0.2;
+      const obj = getRandomObject();
+      cell.textContent = obj;
 
-      cell.textContent = isBomb ? bombEmoji : moleEmoji;
+      let clicked = false;
 
       cell.onclick = () => {
-        if (isBomb) {
+        if (clicked) return;
+        clicked = true;
+
+        clearTimeout(objectTimeout);
+
+        if (obj === bombEmoji) {
           alert(`Game Over! Final Score: ${score}`);
           resetGame();
         } else {
           score += 10;
           scoreEl.textContent = score;
 
-          if (score >= 100 * level && level < maxLevel) {
+          if (score >= level * 100 && level < maxLevel) {
             level++;
             levelEl.textContent = level;
-            updateSpeed();
           }
+
+          clearGrid();
+          setTimeout(spawnObject, 10); // immediate next
         }
-        clearGrid();
       };
-    };
 
-    const startGame = () => {
-      moleInterval = setInterval(showRandomCharacter, speed);
-    };
-
-    const updateSpeed = () => {
-      speed = Math.max(600, 1500 - (level - 1) * 300);
-      clearInterval(moleInterval);
-      startGame();
+      objectTimeout = setTimeout(() => {
+        clearGrid();
+        spawnObject(); // continue cycle
+      }, getCurrentDuration());
     };
 
     const resetGame = () => {
+      clearTimeout(objectTimeout);
       score = 0;
       level = 1;
-      speed = 1500;
       scoreEl.textContent = score;
       levelEl.textContent = level;
-      clearInterval(moleInterval);
       clearGrid();
-      startGame();
+      setTimeout(spawnObject, 100);
     };
 
+    // Start game
     createGrid();
-    startGame();
+    spawnObject();
   </script>
 
 </body>
