@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Whack-a-Mole</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f0f8ff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 36px;
+      font-weight: bold;
+      margin: 20px 0;
+    }
+
+    .scoreboard {
+      position: sticky;
+      top: 0;
+      background-color: #f0f8ff;
+      width: 100%;
+      text-align: center;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 20px;
+      font-size: 24px;
+    }
+
+    #game {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-template-rows: repeat(3, 100px);
+      gap: 10px;
+      margin-top: 50px;
+    }
+
+    .hole {
+      width: 100px;
+      height: 100px;
+      background-color: #8fbc8f;
+      border-radius: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 40px;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .hole:hover {
+      transform: scale(1.05);
+    }
+
+    @media (max-width: 600px) {
+      #game {
+        grid-template-columns: repeat(3, 70px);
+        grid-template-rows: repeat(3, 70px);
+        gap: 8px;
+      }
+
+      .hole {
+        width: 70px;
+        height: 70px;
+        font-size: 28px;
+      }
+
+      h1 {
+        font-size: 28px;
+      }
+
+      .scoreboard {
+        font-size: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Whack-a-Mole</h1>
+
+  <div class="scoreboard">
+    <div>Score: <span id="score">0</span></div>
+    <div>Level: <span id="level">1</span></div>
+  </div>
+
+  <div id="game"></div>
+
+  <script>
+    const gameGrid = document.getElementById('game');
+    const scoreEl = document.getElementById('score');
+    const levelEl = document.getElementById('level');
+
+    let score = 0;
+    let level = 1;
+    let speed = 1500; // in ms
+    let maxLevel = 5;
+    let moleInterval;
+    const moleEmoji = '🐹';
+    const bombEmoji = '💣';
+
+    const createGrid = () => {
+      for (let i = 0; i < 9; i++) {
+        const cell = document.createElement('div');
+        cell.classList.add('hole');
+        cell.dataset.index = i;
+        gameGrid.appendChild(cell);
+      }
+    };
+
+    const clearGrid = () => {
+      document.querySelectorAll('.hole').forEach(cell => {
+        cell.textContent = '';
+        cell.onclick = null;
+      });
+    };
+
+    const getRandomCell = () => {
+      const cells = document.querySelectorAll('.hole');
+      const index = Math.floor(Math.random() * cells.length);
+      return cells[index];
+    };
+
+    const showRandomCharacter = () => {
+      clearGrid();
+
+      const cell = getRandomCell();
+      const isBomb = Math.random() < 0.2;
+
+      cell.textContent = isBomb ? bombEmoji : moleEmoji;
+
+      cell.onclick = () => {
+        if (isBomb) {
+          alert(`Game Over! Final Score: ${score}`);
+          resetGame();
+        } else {
+          score += 10;
+          scoreEl.textContent = score;
+
+          if (score >= 100 * level && level < maxLevel) {
+            level++;
+            levelEl.textContent = level;
+            updateSpeed();
+          }
+        }
+        clearGrid();
+      };
+    };
+
+    const startGame = () => {
+      moleInterval = setInterval(showRandomCharacter, speed);
+    };
+
+    const updateSpeed = () => {
+      speed = Math.max(600, 1500 - (level - 1) * 300);
+      clearInterval(moleInterval);
+      startGame();
+    };
+
+    const resetGame = () => {
+      score = 0;
+      level = 1;
+      speed = 1500;
+      scoreEl.textContent = score;
+      levelEl.textContent = level;
+      clearInterval(moleInterval);
+      clearGrid();
+      startGame();
+    };
+
+    createGrid();
+    startGame();
+  </script>
+
+</body>
+</html>
