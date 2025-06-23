@@ -1,32 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Whack-a-Mole</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Whack-a-Mole</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <h1>Whack-a-Mole</h1>
 
-  <h1>Whack-a-Mole</h1>
+    <div class="scoreboard">
+      <div>Score: <span id="score">0</span></div>
+      <div>Level: <span id="level">1</span></div>
+    </div>
 
-  <div class="scoreboard">
-    <div>Score: <span id="score">0</span></div>
-    <div>Level: <span id="level">1</span></div>
-  </div>
+    <div class="controls">
+      <button id="startBtn">Start</button>
+      <button id="pauseBtn" disabled>Pause</button>
+      <button id="resetBtn" disabled>Reset</button>
+    </div>
 
-  <!-- ✅ New level-up banner -->
-  <div id="level-up-banner" class="hidden">Level Up!</div>
+    <div id="level-up-banner" class="hidden"></div>
 
-  <!-- Buttons -->
-  <div class="controls">
-    <button id="startBtn">Start</button>
-    <button id="pauseBtn" disabled>Pause</button>
-    <button id="resetBtn" disabled>Reset</button>
-  </div>
+    <div id="game"></div>
 
-  <div id="game"></div>
+    <!-- Audio files -->
+    <audio id="ding-sound" src="assets/ding.mp3" preload="auto"></audio>
+    <audio id="buzz-sound" src="assets/buzz.mp3" preload="auto"></audio>
 
-  <script src="script.js"></script>
-</body>
+    <script src="script.js"></script>
+  </body>
 </html>

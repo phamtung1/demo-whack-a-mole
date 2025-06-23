@@ -110,16 +110,26 @@ h1 {
 }
 
 @keyframes fade {
-  0% { opacity: 0; transform: translateY(-20px); }
-  20% { opacity: 1; transform: translateY(0); }
-  80% { opacity: 1; }
-  100% { opacity: 0; transform: translateY(-20px); }
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
 }
 
 .hidden {
   display: none;
 }
-
 
 @media (max-width: 600px) {
   #game {
@@ -140,5 +150,32 @@ h1 {
 
   .scoreboard {
     font-size: 20px;
+  }
+}
+
+.flash-green {
+  background-color: #00ff00 !important;
+  transition: background-color 0.3s ease;
+}
+
+.shake {
+  animation: shake 0.4s;
+}
+
+@keyframes shake {
+  0% {
+    transform: translate(2px, 2px);
+  }
+  25% {
+    transform: translate(-2px, -2px);
+  }
+  50% {
+    transform: translate(2px, -2px);
+  }
+  75% {
+    transform: translate(-2px, 2px);
+  }
+  100% {
+    transform: translate(0, 0);
   }
 }
