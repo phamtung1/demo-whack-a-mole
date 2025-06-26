@@ -1,0 +1,11 @@
+{
+  "type": "module",
+  "scripts": {
+    "start": "http-server .",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1",
+    "jest": "^30.0.3"
+  }
+}

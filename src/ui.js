@@ -1,3 +1,18 @@
+import {
+  getDuration,
+  updateScore,
+  resetGame,
+  pauseGame,
+  resumeGame,
+  startGame,
+  shouldSpawn,
+  setSpawnedObject,
+  handleObjectClick,
+  getState,
+  moleEmoji,
+  bombEmoji,
+} from './game.js';
+
 const gameGrid = document.getElementById("game");
 const scoreEl = document.getElementById("score");
 const levelEl = document.getElementById("level");
@@ -10,25 +25,7 @@ const startBtn = document.getElementById("startBtn");
 const pauseBtn = document.getElementById("pauseBtn");
 const resetBtn = document.getElementById("resetBtn");
 
-let score = 0;
-let level = 1;
-let maxLevel = 5;
 let objectTimeout = null;
-let currentObject = null;
-let objectIndex = null;
-let gameRunning = false;
-let isPaused = false;
-
-const moleEmoji = "🐹";
-const bombEmoji = "💣";
-
-const levelSpeeds = {
-  1: 1500,
-  2: 1200,
-  3: 1000,
-  4: 800,
-  5: 600,
-};
 
 function createGrid() {
   for (let i = 0; i < 9; i++) {
@@ -45,16 +42,10 @@ function clearGrid() {
     cell.textContent = "";
     cell.classList.remove("flash-green");
   });
-  currentObject = null;
-  objectIndex = null;
 }
 
-function getDuration() {
-  return levelSpeeds[level] || 600;
-}
-
-function showLevelUpBanner() {
-  levelUpBanner.textContent = `Level Up! Welcome to Level ${level}`;
+function showLevelUpBanner(newLevel) {
+  levelUpBanner.textContent = `Level Up! Welcome to Level ${newLevel}`;
   levelUpBanner.style.display = "block";
   setTimeout(() => {
     levelUpBanner.style.display = "none";
@@ -62,110 +53,103 @@ function showLevelUpBanner() {
 }
 
 function spawnObject() {
-  if (!gameRunning || isPaused) return;
+  if (!shouldSpawn()) return;
 
   clearGrid();
 
   const index = Math.floor(Math.random() * 9);
-  const cell = document.querySelectorAll(".hole")[index];
   const isBomb = Math.random() < 0.2;
+  const type = isBomb ? "bomb" : "mole";
 
-  currentObject = isBomb ? "bomb" : "mole";
-  objectIndex = index;
+  const cell = document.querySelectorAll(".hole")[index];
   cell.textContent = isBomb ? bombEmoji : moleEmoji;
+
+  setSpawnedObject(type, index);
 
   objectTimeout = setTimeout(spawnObject, getDuration());
 }
 
 function handleCellClick(e) {
-  if (!gameRunning || isPaused || currentObject === null) return;
-
-  const clickedIndex = parseInt(e.target.dataset.index);
-  if (clickedIndex !== objectIndex) return;
+  const index = parseInt(e.target.dataset.index);
+  const objectType = handleObjectClick(index);
+  if (!objectType) return;
 
   const cell = e.target;
-  const objectType = currentObject;
-
-  currentObject = null;
-  clearGrid();
 
   if (objectType === "mole") {
     dingSound.currentTime = 0;
     dingSound.play();
-
     cell.classList.add("flash-green");
     setTimeout(() => cell.classList.remove("flash-green"), 300);
 
-    updateScore(10);
-  } else {
+    const { score, level, leveledUp } = updateScore(10);
+    scoreEl.textContent = score;
+    levelEl.textContent = level;
+
+    if (leveledUp) {
+      showLevelUpBanner(level);
+      clearTimeout(objectTimeout);
+      setTimeout(spawnObject, getDuration());
+    }
+  } else if (objectType === "bomb") {
     buzzSound.currentTime = 0;
     buzzSound.play();
-
     document.body.classList.add("shake");
     setTimeout(() => document.body.classList.remove("shake"), 400);
 
+    const finalScore = getState().score;
     setTimeout(() => {
-      alert(`Game Over! Final Score: ${score}`);
+      alert(`Game Over! Final Score: ${finalScore}`);
       resetGame();
+      clearGrid();
+      updateUI();
     }, 100);
   }
 }
 
-function updateScore(change) {
-  score = Math.max(0, score + change);
+function updateUI() {
+  const { score, level } = getState();
   scoreEl.textContent = score;
-
-  const newLevel = Math.min(maxLevel, Math.floor(score / 100) + 1);
-  if (newLevel > level) {
-    level = newLevel;
-    levelEl.textContent = level;
-    showLevelUpBanner();
-    clearTimeout(objectTimeout);
-    setTimeout(spawnObject, getDuration());
-  }
+  levelEl.textContent = level;
+  updateButtonStates();
 }
 
-function startGame() {
+function startGameUI() {
+  const { gameRunning, isPaused } = getState();
   if (gameRunning && !isPaused) return;
-  gameRunning = true;
-  isPaused = false;
 
-  if (score === 0 && level === 1) {
-    updateScore(0); // trigger UI
+  startGame();
+  if (getState().score === 0 && getState().level === 1) {
+    updateScore(0); // trigger UI sync
   }
 
   spawnObject();
-  updateButtonStates();
+  updateUI();
 }
 
-function pauseGame() {
-  isPaused = true;
+function pauseGameUI() {
+  pauseGame();
   clearTimeout(objectTimeout);
   updateButtonStates();
 }
 
-function resetGame() {
-  gameRunning = false;
-  isPaused = false;
-  score = 0;
-  level = 1;
-
-  scoreEl.textContent = score;
-  levelEl.textContent = level;
+function resetGameUI() {
+  resetGame();
   clearTimeout(objectTimeout);
   clearGrid();
-  updateButtonStates();
+  updateUI();
 }
 
 function updateButtonStates() {
+  const { gameRunning, isPaused } = getState();
   startBtn.disabled = gameRunning && !isPaused;
   pauseBtn.disabled = !gameRunning || isPaused;
   resetBtn.disabled = !gameRunning && !isPaused;
 }
 
-startBtn.addEventListener("click", startGame);
-pauseBtn.addEventListener("click", pauseGame);
-resetBtn.addEventListener("click", resetGame);
+startBtn.addEventListener("click", startGameUI);
+pauseBtn.addEventListener("click", pauseGameUI);
+resetBtn.addEventListener("click", resetGameUI);
 
 createGrid();
-updateButtonStates();
+updateUI();
