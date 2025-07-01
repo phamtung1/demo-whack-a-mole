@@ -11,10 +11,11 @@ import {
   getState,
   moleEmoji,
   bombEmoji,
-} from './game.js';
+} from "./game.js";
 
 const gameGrid = document.getElementById("game");
 const scoreEl = document.getElementById("score");
+const highScoreEl = document.getElementById("high-score"); // 👈 Add this
 const levelEl = document.getElementById("level");
 const levelUpBanner = document.getElementById("level-up-banner");
 
@@ -82,9 +83,10 @@ function handleCellClick(e) {
     cell.classList.add("flash-green");
     setTimeout(() => cell.classList.remove("flash-green"), 300);
 
-    const { score, level, leveledUp } = updateScore(10);
+    const { score, level, leveledUp, highScore } = updateScore(10);
     scoreEl.textContent = score;
     levelEl.textContent = level;
+    highScoreEl.textContent = highScore; // 👈 Update high score display
 
     if (leveledUp) {
       showLevelUpBanner(level);
@@ -108,9 +110,10 @@ function handleCellClick(e) {
 }
 
 function updateUI() {
-  const { score, level } = getState();
+  const { score, level, highScore } = getState();
   scoreEl.textContent = score;
   levelEl.textContent = level;
+  highScoreEl.textContent = highScore; // 👈 Initial load
   updateButtonStates();
 }
 
